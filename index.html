@@ -1,0 +1,41 @@
+<!-- 1. Open Developer Tools (F12) -->
+<!-- 2. Go to the Network tab -->
+<!-- 3. Set Network throttling to Slow 3G in the dropdown -->
+<!-- 4. Run your code and observe console logs -->
+<!-- 5. Reset throttling to No throttling after testing -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Measurements</title>
+</head>
+<body>
+    <h1>Fetch Measurements Example</h1>
+
+    <script>
+        // Fetch the measurements.json file
+        fetch('http://localhost:3000/measurements.json')
+            .then(async (response) => {
+                // response.body is a ReadableStream
+                const reader = response.body.getReader();
+                for await (const chunk of readChunks(reader)) {
+                    console.log(`Received chunk of size ${chunk.length}`);
+                }
+            });
+
+        // Function to read chunks from the provided reader
+        function readChunks(reader) {
+            return {
+                async* [Symbol.asyncIterator]() {
+                    let readResult = await reader.read();
+                    while (!readResult.done) {
+                        yield readResult.value;
+                        readResult = await reader.read();
+                    }
+                },
+            };
+        }
+    </script>
+</body>
+</html>
